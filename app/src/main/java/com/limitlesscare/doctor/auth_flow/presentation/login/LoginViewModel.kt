@@ -26,43 +26,53 @@ class LoginViewModel @Inject constructor(
 
     override fun handleAction(action: LoginAction): Flow<LoginResult> {
         return flow {
-            if (action is LoginAction.Login) {
-                handleLogin(action.data, this)
+            when (action) {
+                is LoginAction.Login -> {
+                    handleLogin(action.data, this)
+                }
+
+                is LoginAction.ValidateLogin -> {
+                    validateLogin(action.data)
+                }
             }
         }
     }
 
-    fun login(loginData: LoginData) {
+    fun checkDataValidation(loginData: LoginData):Boolean {
         if (!loginData.email.isValidEmail()) {
             emitState {
                 it.copy(isEmailError = true)
             }
-            return
+            return false
         }
         if (!loginData.password.isValidPassword()) {
             emitState {
                 it.copy(isPasswordError = true)
             }
-            return
+            return false
         }
-        executeAction(LoginAction.Login(loginData))
+        return true
     }
 
-    fun validateLogin(loginData: LoginData): Boolean {
-        return (loginData.email.isNotEmpty() && loginData.password.isNotEmpty())
+    private fun validateLogin(loginData: LoginData) {
+        emitState {
+            it.copy(isButtonEnabled = loginData.email.isNotEmpty() && loginData.password.isNotEmpty())
+        }
     }
 
     private suspend fun handleLogin(
         loginData: LoginData,
         flowCollector: FlowCollector<LoginResult>
     ) {
-        flowCollector.emit(LoginResult.Login(LoginViewState(isLoading = true)))
-        val dataState = loginUseCase(loginData)
-        if (dataState is DataState.Success)
-            flowCollector.emit(
-                (LoginResult.Login(LoginViewState(data = true)))
-            )
-        else
-            flowCollector.emit(LoginResult.Login(LoginViewState(error = (dataState as DataState.Error).throwable)))
+        if (checkDataValidation(loginData)) {
+            flowCollector.emit(LoginResult.Login(LoginViewState(isLoading = true)))
+            val dataState = loginUseCase(loginData)
+            if (dataState is DataState.Success)
+                flowCollector.emit(
+                    (LoginResult.Login(LoginViewState(data = true, isSuccess = true)))
+                )
+            else
+                flowCollector.emit(LoginResult.Login(LoginViewState(error = (dataState as DataState.Error).throwable)))
+        }
     }
 }

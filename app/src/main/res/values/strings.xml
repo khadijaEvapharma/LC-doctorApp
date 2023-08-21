@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Limitless_doctor</string>
+    <string name="app_name">LC_doctor</string>
     <string name="logo_text">Limitless Care For Doctors</string>
     <string name="new_approch">"New approach to health care "</string>
   <!--General-->

@@ -5,4 +5,5 @@ import com.limitlesscare.doctor.auth_flow.domain.model.LoginData
 
 sealed class LoginAction : Action {
     data class Login(val data: LoginData) : LoginAction()
+    data class ValidateLogin(val data: LoginData):LoginAction()
 }

@@ -43,10 +43,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.limitlesscare.doctor.R
+import com.limitlesscare.doctor.app_core.components.CircularProgressCustomDialog
 import com.limitlesscare.doctor.app_core.components.PrimaryButton
 import com.limitlesscare.doctor.app_core.components.PrimaryTextField
 import com.limitlesscare.doctor.app_core.ext.handleError
 import com.limitlesscare.doctor.auth_flow.domain.model.LoginData
+import com.limitlesscare.doctor.auth_flow.presentation.login.action.LoginAction
 import com.limitlesscare.doctor.auth_flow.presentation.login.viewstate.LoginScreenViewState
 import com.limitlesscare.doctor.ui.LimitlessTheme
 import com.limitlesscare.doctor.ui.Limitless_doctorTheme
@@ -61,38 +63,22 @@ fun LoginScreen(
 ) {
     val viewModel = hiltViewModel<LoginViewModel>()
     val state = viewModel.viewStates.collectAsState()
-    LoginScreenContent(navigator, state = state.value, viewModel::validateLogin, viewModel::login)
+    LoginScreenContent(navigator, state = state.value, viewModel::executeAction)
 }
 
 @Composable
 fun LoginScreenContent(
     navigator: DestinationsNavigator,
     state: LoginScreenViewState,
-    enableButton: (loginData: LoginData) -> Boolean,
-    onLoginClicked: (loginData: LoginData) -> Unit,
-) {
+    onEvent: (action: LoginAction) -> Unit) {
+
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordToggle by remember { mutableStateOf(false) }
 
     Scaffold(
         modifier = Modifier,
-        backgroundColor = LimitlessTheme.colors.background,
-        bottomBar = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = dimensionResource(id = R.dimen.padding_42))
-            ) {
-                if (state.loginViewState.isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center),
-                        color = LimitlessTheme.colors.primary,
-                        backgroundColor = LimitlessTheme.colors.grey,
-                    )
-                }
-            }
-        }
+        backgroundColor = LimitlessTheme.colors.background
     ) {
         Column(
             modifier = Modifier
@@ -106,7 +92,8 @@ fun LoginScreenContent(
                     .padding(it)
                     .padding(
                         start = dimensionResource(id = R.dimen.padding_20),
-                        top = dimensionResource(id = R.dimen.padding_45)
+                        top = dimensionResource(id = R.dimen.padding_45),
+                        bottom = dimensionResource(id = R.dimen.padding_20)
                     )
                     .fillMaxWidth()
             ) {
@@ -119,52 +106,40 @@ fun LoginScreenContent(
                 )
 
             }
-            Row(
-                modifier = Modifier.padding(
-                    start = dimensionResource(id = R.dimen.padding_20),
-                    top = dimensionResource(id = R.dimen.padding_35)
-                )
-            ) {
+
                 Text(
+                    modifier = Modifier.padding(
+                        start = dimensionResource(id = R.dimen.padding_20),
+                        top = dimensionResource(id = R.dimen.padding_35)),
                     text = stringResource(id = R.string.login),
                     color = LimitlessTheme.colors.black,
                     fontSize = 24.sp,
                     fontFamily = FontFamily(Font(R.font.ibmplex_sans_medium)),
                     fontWeight = FontWeight.Bold
                 )
-            }
-            Row(
-                modifier = Modifier.padding(
-                    start = dimensionResource(id = R.dimen.padding_20),
-                    top = dimensionResource(id = R.dimen.padding_13)
-                )
-            ) {
                 Text(
+                    modifier = Modifier.padding(
+                        start = dimensionResource(id = R.dimen.padding_20),
+                        top = dimensionResource(id = R.dimen.padding_13)
+                    ),
                     text = stringResource(id = R.string.email_address),
                     color = LimitlessTheme.colors.black,
                     fontSize = 14.sp,
                     fontFamily = FontFamily(Font(R.font.ibmplex_sans_medium))
                 )
-            }
-            Row(
-                modifier = Modifier
-                    .padding(
-                        start = dimensionResource(id = R.dimen.padding_20),
-                        top = dimensionResource(id = R.dimen.padding_13),
-                        end = dimensionResource(id = R.dimen.padding_20)
-                    )
-                    .fillMaxWidth()
-
-
-            ) {
                 PrimaryTextField(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(
+                            start = dimensionResource(id = R.dimen.padding_20),
+                            top = dimensionResource(id = R.dimen.padding_13),
+                            end = dimensionResource(id = R.dimen.padding_20)
+                        ),
                     value = email,
                     singleLine = true,
                     onValueChange = { value: String, error: Boolean ->
                         email = value
                         state.isEmailError = error
-
+                        onEvent(LoginAction.ValidateLogin(LoginData(value, password)))
                     },
                     isError = state.isEmailError,
                     placeholder = { Text(stringResource(id = R.string.email_address)) },
@@ -172,7 +147,7 @@ fun LoginScreenContent(
                     shape = RoundedCornerShape(50),
 
                     )
-            }
+
             Text(
                 modifier = Modifier.padding(
                     start = dimensionResource(id = R.dimen.padding_20),
@@ -208,6 +183,7 @@ fun LoginScreenContent(
                 onValueChange = { value: String, error: Boolean ->
                     password = value
                     state.isPasswordError = error
+                    onEvent(LoginAction.ValidateLogin(LoginData(email, value)))
                 },
                 singleLine = true,
                 placeholder = { Text(stringResource(id = R.string.password)) },
@@ -237,9 +213,9 @@ fun LoginScreenContent(
 
             )
             PrimaryButton(
-                isEnabled = enableButton(LoginData(email, password)),
+                isEnabled = state.isButtonEnabled,
                 onClick = {
-                    onLoginClicked(LoginData(email, password))
+                    onEvent(LoginAction.Login(LoginData(email, password)))
                 },
                 buttonBackground = LimitlessTheme.colors.primary,
                 buttonText = stringResource(id = R.string.login),
@@ -255,6 +231,14 @@ fun LoginScreenContent(
             )
         }
     }
+    HandleStates(state = state)
+
+}
+@Composable
+private fun HandleStates(state:LoginScreenViewState){
+    if (state.loginViewState.isLoading) {
+        CircularProgressCustomDialog(open = state.loginViewState.isLoading)
+    }
     if (state.loginViewState.error != null) {
         val context = LocalContext.current
         context.handleError(
@@ -263,7 +247,10 @@ fun LoginScreenContent(
     } else if (state.loginViewState.isSuccess) {
         Toast.makeText(LocalContext.current, "Login successfully", Toast.LENGTH_SHORT).show()
     }
+    if (state.isEmailError){
+        Toast.makeText(LocalContext.current, "please enter a valid email", Toast.LENGTH_SHORT).show()
 
+    }
 }
 
 @Preview(showBackground = true)
@@ -273,10 +260,9 @@ fun ScreenPreview() {
         LoginScreenContent(
             EmptyDestinationsNavigator,
             state = LoginScreenViewState(),
-            enableButton = { _ ->
-                true
-            },
-            { _ -> }
+            {
+
+            }
         )
     }
 }

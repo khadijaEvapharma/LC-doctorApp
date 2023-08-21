@@ -8,5 +8,6 @@ typealias LoginViewState = CommonViewState<Boolean>
 data class LoginScreenViewState(
     val loginViewState: LoginViewState = LoginViewState(),
     var isEmailError: Boolean = false,
-    var isPasswordError: Boolean = false
+    var isPasswordError: Boolean = false,
+    var isButtonEnabled:Boolean=false
 ) : ViewState

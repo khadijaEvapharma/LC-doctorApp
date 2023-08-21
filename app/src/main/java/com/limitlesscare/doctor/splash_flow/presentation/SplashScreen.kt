@@ -108,7 +108,12 @@ private fun SplashScreenContent(
                 style = MaterialTheme.typography.subtitle2,
             )
         }
-        ShowDialogForUpdate(navigator, state)
+       // ShowDialogForUpdate(navigator, state)
+        navigator.navigate(LoginScreenDestination) {
+            popUpTo(SplashScreenDestination.route) {
+                inclusive = true
+            }
+        }
 
     }
 }
