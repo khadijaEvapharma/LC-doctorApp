@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "491088636074",
+    "project_id": "se7etak-for-doctors-v2-dev",
+    "storage_bucket": "se7etak-for-doctors-v2-dev.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:491088636074:android:668a8163786a7a62edc8d3",
+        "android_client_info": {
+          "package_name": "com.limitlesscare.doctor"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "491088636074-ad3colufnnjm82d0gs4ob3713i48b3ai.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAG5Ka_sS0q6l2ouY84veogK7HoY_SQHD4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "491088636074-ad3colufnnjm82d0gs4ob3713i48b3ai.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:491088636074:android:aa35a3f4c9a35cabedc8d3",
+        "android_client_info": {
+          "package_name": "com.limitlesscare.doctor.staging"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "491088636074-ad3colufnnjm82d0gs4ob3713i48b3ai.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAG5Ka_sS0q6l2ouY84veogK7HoY_SQHD4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "491088636074-ad3colufnnjm82d0gs4ob3713i48b3ai.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

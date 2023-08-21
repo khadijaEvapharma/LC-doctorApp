@@ -1,0 +1,4 @@
+
+rootProject.name = "Limitless_doctor"
+include ':app'
+include ':core'
